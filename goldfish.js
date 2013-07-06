@@ -12,48 +12,132 @@ window.onload = function(){
   var lost_game = function(){
     game.paused=true;
     var lost = jam.Game(640, 480, document.body, game._canvas);
-    var p = jam.AnimatedSprite(320, 240);
+    // Sceen count;
+    lost.count = 5;
+    // 1 or 2;
+    lost.flag = 1;
+    lost.moving = false;
+    p = jam.AnimatedSprite(320, 240);
     var width = 20;
     var height = 30;
-    var rate = 10;
+    var rate = 6;
+    lost.dist_moved = 0;
+    var coords = [
+      [0, 0, 92, 85],
+      [97, 0, 56, 38],
+      [519, 1, 121, 78],
+      [0, 374, 71, 105],
+      [567, 421, 72, 59]
+    ];
+    var map_os = [];
+    var make_map = function(){
+      for (i in coords){
+        c = coords[i];
+        var s = new jam.Sprite(c[0], c[1]);
+        s.width = c[2];
+        s.height = c[3];
+        s.immovable = true;
+        i.image = undefined;
+        map_os.push(s);
+        lost.add(s);
+      }
+    };
+    make_map();
+    lost.move = function(dir){
+      lost.moving = true;
+      var s = 40;
+      lost.dist = 0;
+      lost.speed = {};
+      lost.speed.x = 0;
+      lost.speed.y = 0;
+      lost.dir = dir;
+      if (dir === 'u'){
+        lost.dist = 640;
+        lost.speed.x = s;
+        lost.speed.y = 0;
+      } else if (dir === 'd') {
+        lost.dist = 640;
+        lost.speed.x = -s;
+        lost.speed.y = 0;
+      } else if (dir === 'l') {
+        lost.dist = 480;
+        lost.speed.x = 0;
+        lost.speed.y = -s;
+      } else if (dir === 'r') {
+        lost.dist = 480;
+        lost.speed.x = 0;
+        lost.speed.y = s;
+      } else {
+        console.log("No dir defined. Panic.");
+      }
+      var i;
+      for (i in lost._children){
+        lost._children[i].velocity = speed;
+      }
+    };
+    p.speed = 20;
     p.setImage("data/shadow.png", width, height);
     p.anim_idle = jam.Animation.Strip([0], width, height, 0);
     p.anim_run = jam.Animation.Strip([4,3,4,5], width, height, rate);
-
+    p.anim_up = jam.Animation.Strip([1,0,1,2], width, height, rate);
+    p.anim_down = jam.Animation.Strip([7,6,7,8], width, height, rate);
+    p.playAnimation(p.anim_idle);
     p.update = jam.extend(p.update, function(elapsed){
-	  if(jam.Input.buttonDown("LEFT")){
-	    p.velocity.x = -p.speed;
-	    p.playAnimation(p.anim_run);
-	    p.facing = jam.Sprite.LEFT;
-	  }
-	  else if(jam.Input.buttonDown("RIGHT")){
-	    p.velocity.x = p.speed
-        p.playAnimation(p.anim_run);
-	    p.facing = jam.Sprite.RIGHT;
-	  }
-	  else if (jam.Input.buttonDown("UP")){
-	    p.velocity.y = -p.speed;
-	    p.playAnimation(p.anim_run);
-	  } else if (jam.Input.buttonDown("DOWN")){
-	    p.velocity.y = p.speed;
-	    p.playAnimation(p.anim_run);
-      } else{
-	    p.playAnimation(p.anim_idle);
-      }
-	  if (jam.Input.justPressed("X")) {
-        if (inter != undefined) {
-          inter.interact();
+      p.velocity.x = 0;
+      p.velocity.y = 0;
+      for (o in map_os) {
+	    if (p.collide(map_os[o])){
         }
       }
-    } else {
-	  if (jam.Input.justPressed("X")) {
-        p.inter_cb();
+      if (lost.moving === false){
+	    if(jam.Input.buttonDown("LEFT")){
+	      p.velocity.x = -p.speed;
+	      p.playAnimation(p.anim_run);
+	      p.facing = jam.Sprite.LEFT;
+	    }
+	    else if(jam.Input.buttonDown("RIGHT")){
+	      p.velocity.x = p.speed
+          p.playAnimation(p.anim_run);
+	      p.facing = jam.Sprite.RIGHT;
+	    }
+	    else if (jam.Input.buttonDown("UP")){
+	      p.velocity.y = -p.speed;
+	      p.playAnimation(p.anim_up);
+	    } else if (jam.Input.buttonDown("DOWN")){
+	      p.velocity.y = p.speed;
+	      p.playAnimation(p.anim_down);
+        } else{
+	      p.playAnimation(p.anim_idle);
+        }
+        if (p.x < 0) {
+          lost.move('r');
+        } else if (p.x > 640) {
+          lost.move('l');
+        } else if (p.y < 0) {
+          lost.move('d');
+        } else if (p.y > 480) {
+          lost.move('u');
+        }
+      } else {
+        if (lost.dist_moved >= lost.dist) {
+          var i;
+          for (i in lost._children){
+            lost._children[i].velocity = 0;
+            lost.moving = false;
+          }
+        } else {
+          lost.dist_moved += Math.abs(lost.x - lost.dist_mo
+        }
       }
+
     });
-    var bg = jam.Sprite(0, 0);
-    bg.setImage("data/lost.png", 640, 480);
+    var bg1 = jam.Sprite(0, 0);
+    bg1.setImage("data/lost.png", 640, 480);
+    var bg2 = jam.Sprite(0, 0);
+    bg2.setImage("data/lost.png", 640, 480);
+    lost.add(bg2);
     lost.add(p)
-    lost.add(bg);
+    lost.add(bg1);
     lost.run();
   };
 
