@@ -10,6 +10,7 @@ window.onload = function(){
   jam.preload("data/player.png");
 
   var lost_game = function(){
+    /** /
     game.paused=true;
     var lost = jam.Game(640, 480, document.body, game._canvas);
     // Sceen count;
@@ -139,6 +140,7 @@ window.onload = function(){
     lost.add(p)
     lost.add(bg1);
     lost.run();
+    /**/
   };
 
   var collection_game = function(){
