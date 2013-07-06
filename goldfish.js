@@ -9,22 +9,337 @@ window.onload = function(){
   // Start loading images immediately instead of when they're needed
   jam.preload("data/player.png");
 
+  var lost_game = function(){
+    game.paused=true;
+    var lost = jam.Game(640, 480, document.body, game._canvas);
+    var p = jam.AnimatedSprite(320, 240);
+    var width = 20;
+    var height = 30;
+    var rate = 10;
+    p.setImage("data/shadow.png", width, height);
+    p.anim_idle = jam.Animation.Strip([0], width, height, 0);
+    p.anim_run = jam.Animation.Strip([4,3,4,5], width, height, rate);
+
+    p.update = jam.extend(p.update, function(elapsed){
+	  if(jam.Input.buttonDown("LEFT")){
+	    p.velocity.x = -p.speed;
+	    p.playAnimation(p.anim_run);
+	    p.facing = jam.Sprite.LEFT;
+	  }
+	  else if(jam.Input.buttonDown("RIGHT")){
+	    p.velocity.x = p.speed
+        p.playAnimation(p.anim_run);
+	    p.facing = jam.Sprite.RIGHT;
+	  }
+	  else if (jam.Input.buttonDown("UP")){
+	    p.velocity.y = -p.speed;
+	    p.playAnimation(p.anim_run);
+	  } else if (jam.Input.buttonDown("DOWN")){
+	    p.velocity.y = p.speed;
+	    p.playAnimation(p.anim_run);
+      } else{
+	    p.playAnimation(p.anim_idle);
+      }
+	  if (jam.Input.justPressed("X")) {
+        if (inter != undefined) {
+          inter.interact();
+        }
+      }
+    } else {
+	  if (jam.Input.justPressed("X")) {
+        p.inter_cb();
+      }
+    });
+    var bg = jam.Sprite(0, 0);
+    bg.setImage("data/lost.png", 640, 480);
+    lost.add(p)
+    lost.add(bg);
+    lost.run();
+  };
+
+  var collection_game = function(){
+    game.paused=true;
+    var coll = jam.Game(640, 480, document.body, game._canvas);
+    var width = 10;
+    var height = width;
+    var color = 'black';
+    var tmp_canvas = document.createElement("canvas");
+    tmp_canvas.width = width;
+    tmp_canvas.height = height;
+    var tmp_context = tmp_canvas.getContext("2d");
+    tmp_context.fillStyle = color;
+    tmp_context.fillRect( 0, 0, width, height);
+
+    var make_bug = function(x, y){
+      var b = new jam.Sprite(x, y);
+      b.width = 10;
+      b.height = 10;
+      b.image = tmp_canvas;
+      b.goal = undefined;
+      b.speed = 0.5;
+      b.update = jam.extend(b.update, function(elapsed){
+        if (b.goal === undefined) {
+          b.goal = {};
+          b.goal.x = Math.floor(Math.random()*640);
+          b.goal.y = Math.floor(Math.random()*480);
+          var vec = {};
+          vec.x = b.x - b.goal.x;
+          vec.y = b.y - b.goal.y;
+
+          if(((Math.abs(b.x - b.goal.x) > 20 ) || (Math.abs(b.y - b.goal.y) > 20))){
+            console.log(vec);
+            b.velocity.x = -vec.x * b.speed;
+            b.velocity.y = -vec.y * b.speed;
+          }
+        } else {
+          var dist = (((b.goal.x - b.x) * (b.goal.x - b.x))
+                      +
+                      ((b.goal.y - b.y) * (b.goal.y - b.y)));
+          if (dist < 20) {
+            b.goal = undefined;
+          }
+
+        }
+      });
+      coll.add(b);
+    };
+  var t = make_bug(20, 20);
+  coll.run();
+  };
+
   var initialize = function(){
-    var game = jam.Game(640, 480, document.body);
+    game = jam.Game(640, 480, document.body);
 
     jam.Debug.showBoundingBoxes = true;		// Uncomment to see the collision regions
 
-  var bg = jam.Sprite(0, 0);
-    bg.width = 640; bg.height = 480;
+    var objs = [];
+
+    var test_obj = {
+      x : 60,
+      y : 60,
+      width : 16,
+      height : 17,
+      label : "test",
+      img : "data/player_red.png",
+      text : "Hi puppy.",
+      interact : function() {
+        var cb = function() {
+          player.stop_read();
+        };
+        player.read(test_obj, cb);
+      },
+    };
+
+    var coll_obj = {
+      x : 120,
+      y : 120,
+      width : 16,
+      height : 17,
+      label : "test",
+      img : "data/player_red.png",
+      text : "Hi puppy.",
+      interact : function() {
+        game.paused = true;
+        lost_game();
+      },
+    };
+
+    var makeObj = function(data){
+      var collide_overflow = 8;
+      var obj = jam.AnimatedSprite(data.x, data.y);
+      obj.setImage(data.img, data.width, data.height);
+      obj.setCollisionOffsets(-collide_overflow, -collide_overflow, (collide_overflow * 2) + obj.width, (collide_overflow * 2) + obj.height);
+      obj.text = data.text;
+      obj.interact = data.interact;
+      objs.push(obj);
+      return obj;
+    };
+    var map_os = [];
+    var makeMap = function(){
+      var coords = [
+        [0, 0, 46, 997],
+        [48, 1, 1950, 47],
+        [452, 49, 95, 247],
+        [450, 416, 98, 319],
+        [49, 951, 1950, 53],
+        [450, 822, 97, 126],
+        [229, 85, 218, 123],
+        [74, 391, 173, 55,],
+        [89, 554, 123, 214],
+        [289, 550, 108, 79],
+        [554, 477, 108, 132],
+        [881, 399, 56, 267],
+        [1200, 147, 149, 280],
+        [1452, 49, 95, 61],
+        [1450, 201, 101, 382],
+        [1449, 679, 99, 269],
+        [1553, 250, 398, 94],
+        [1952, 48, 44, 899],
+        [1921, 71, 27, 66],
+        [1903, 161, 45, 68],
+        [1659, 453, 98, 202],
+        [1878, 351, 71, 381],
+        [1567, 861, 103, 83],
+        [1781, 793, 109, 109]
+      ];
+      for (i in coords){
+        c = coords[i];
+        var s = new jam.Sprite(c[0], c[1]);
+        s.width = c[2];
+        s.height = c[3];
+        s.immovable = true;
+        i.image = undefined;
+        map_os.push(s);
+        game.add(s);
+      }
+    };
+
+    var makePlayer = function(game, map){
+      var rate = 5;
+      var width = 50;
+      var height = 50;
+      var frames = 4;
+      var img_width = width * frames;
+      var img_height = height;
+      //var offsetx = width * (23-6);
+      var offsetx = 0;
+      var player = jam.AnimatedSprite(80, 80);
+      player.speed = 50;
+      player.reading = false;
+      player.setImage("data/bunny.png", width, height);
+      // Set up player's animations
+      player.anim_idle = jam.Animation.Strip([0], width, height, 0, offsetx);
+      player.anim_run = jam.Animation.Strip([0,1,2,3], width, height, rate, offsetx);
+      player.playAnimation(player.anim_idle);
+
+      player.setCollisionOffsets(0, 0, 0, 0);
+      player.setLayer(1);
+
+      player.lastPositions = [];
+      player.smoothX = player.x + player.width/2;
+      player.smoothY = player.y + player.height/2;
+
+      player.stop_read = function(){
+          player.reading = false;
+          txt.visible = false;
+          txt.text = "";
+          txt_bg.visible = false;
+      };
+
+      player.read = function(o, cb){
+        if (player.reading === true){
+          player.stop_read();
+        } else {
+          player.reading = true;
+          txt_bg.x = player.x - 320;
+          txt_bg.y = player.y + 40;
+          txt.x = txt_bg.x + 20
+          txt.y = txt_bg.y + 40
+          txt.visible = true;
+          txt.text = o.text;
+          txt_bg.visible = true;
+          player.inter_cb = cb;
+        }
+      };
+
+      player.update = jam.extend(player.update, function(elapsed){
+	    // Collision
+        var inter = undefined;
+	    //player.collide(map);
+        for (o in map_os) {
+	      if (player.collide(map_os[o])){
+          }
+        }
+        for (o in objs) {
+	      if (player.overlaps(objs[o])){
+            inter = objs[o];
+          }
+        }
+
+	    // Running / standing
+	    player.velocity.x = 0;
+	    player.velocity.y = 0;
+        if (player.reading == false){
+	      if(jam.Input.buttonDown("LEFT")){
+	        player.velocity.x = -player.speed;
+	        player.playAnimation(player.anim_run);
+	        player.facing = jam.Sprite.LEFT;
+	      }
+	      else if(jam.Input.buttonDown("RIGHT")){
+	        player.velocity.x = player.speed
+            player.playAnimation(player.anim_run);
+	        player.facing = jam.Sprite.RIGHT;
+	      }
+	      else if (jam.Input.buttonDown("UP")){
+	        player.velocity.y = -player.speed;
+	        player.playAnimation(player.anim_run);
+	      } else if (jam.Input.buttonDown("DOWN")){
+	        player.velocity.y = player.speed;
+	        player.playAnimation(player.anim_run);
+          } else{
+	        player.playAnimation(player.anim_idle);
+          }
+	      if (jam.Input.justPressed("X")) {
+            if (inter != undefined) {
+              inter.interact();
+            }
+          }
+        } else {
+	      if (jam.Input.justPressed("X")) {
+            player.inter_cb();
+          }
+        }
+
+	    player.lastPositions.splice(0,0, jam.Vector(player.x + player.width / 2, player.y + player.height / 2));
+	    for(var i = 0; i < Math.min(player.lastPositions.length, 10); ++i){
+	      player.smoothX += player.lastPositions[i].x;
+	      player.smoothY += player.lastPositions[i].y;
+	    }
+	    player.smoothX /= i+1;
+	    player.smoothY /= i+1;
+      });
+      return player;
+    }
+
+    // Mark set.
+
+    var txt = jam.Text(20, 320);
+    txt.font = "20pt monospace";
+    txt.color = "#fff";
+    txt.visible = false;
+    // 640, 480
+    var txt_bg = jam.Sprite(0, 280);
+    var tmp_canvas = document.createElement("canvas");
+    tmp_canvas.width = 640;
+    tmp_canvas.height = 200;
+    var tmp_context = tmp_canvas.getContext("2d");
+    tmp_context.fillStyle = "#666666";
+    tmp_context.fillRect( 0, 0, 640, 200);
+    tmp_context.fillStyle = "#fff";
+    tmp_context.fillRect( 10, 10, 620, 180);
+    tmp_context.fillStyle = "#666666";
+    tmp_context.fillRect( 15, 15, 610, 170);
+    txt_bg.image = tmp_canvas;
+    txt_bg.width = 640;
+    txt_bg.height = 200;
+    txt_bg.visible = false;
+
+    var nbg = jam.Sprite(0, 0);
+    nbg.setImage("data/house.png", 2000, 1000);
+    var bg = jam.Sprite(0, 0);
+    bg.width = 640;
+    bg.height = 480;
     bg.image = document.createElement("canvas");
     bg.image.width = 640;
     bg.image.height = 480;
     erase = false;
     var ctx = bg.image.getContext("2d");
 
-    var map = jam.LevelMap.loadTileMap(32, map1, "data/tiles.png");
-    var player = makePlayer(game, map);
-    test = makeObj(test_obj);
+    var map = jam.LevelMap.loadTileMap(50, map1, "data/tiles.png");
+    player = makePlayer(game, map);
+    game.camera.follow = player;
+    var test = makeObj(test_obj);
+    var coll = makeObj(coll_obj);
 
     bg.color = "rgba(0,128,255,0.75)";
 
@@ -64,116 +379,18 @@ window.onload = function(){
 	  }
     });
 
-    game.add(map);
-    game.add(player);
-    game.add(bg);
+    makeMap();
+    game.add(txt);
+    game.add(txt_bg);
     game.add(test);
+    game.add(coll);
+    game.add(nbg);
+//    game.add(map);
+    game.add(player);
+//    game.add(bg);
 
     game.run();
   }
-
-
-  var makePlayer = function(game, map){
-    var rate = 20;
-    var width = 16;
-    var height = 17;
-    var frames = 6;
-    var img_width = width * frames;
-    var img_height = height;
-    var offsetx = width * (23-6);
-    var player = jam.AnimatedSprite(20, 20);
-    player.setImage("data/player_red.png", width, height);
-    // Set up player's animations
-    player.anim_idle = jam.Animation.Strip([5], width, height, 0, offsetx);
-    player.anim_run = jam.Animation.Strip([0, 1,2,3,4], width, height, rate, offsetx);
-    player.playAnimation(player.anim_idle);
-
-    player.setCollisionOffsets(0, 0, 0, 0);
-    player.setLayer(1);
-
-    player.lastPositions = [];
-    player.smoothX = player.x + player.width/2;
-    player.smoothY = player.y + player.height/2;
-
-    player.update = jam.extend(player.update, function(elapsed){
-	  // Collision
-      var inter = undefined;
-	  player.collide(map);
-      for (o in objs) {
-	    if (player.overlaps(objs[o])){
-          inter = objs[o];
-        }
-      }
-
-	  // Running / standing
-	  player.velocity.x = 0;
-	  player.velocity.y = 0;
-	  if(jam.Input.buttonDown("LEFT")){
-	    player.velocity.x = -90;
-	    player.playAnimation(player.anim_run);
-	    player.facing = jam.Sprite.LEFT;
-	  }
-	  else if(jam.Input.buttonDown("RIGHT")){
-	    player.velocity.x = 90;
-	    player.playAnimation(player.anim_run);
-	    player.facing = jam.Sprite.RIGHT;
-	  }
-	  else if (jam.Input.buttonDown("UP")){
-	    player.velocity.y = -50;
-	    player.playAnimation(player.anim_run);
-	  } else if (jam.Input.buttonDown("DOWN")){
-	    player.velocity.y = 50;
-	    player.playAnimation(player.anim_run);
-      } else{
-	    player.playAnimation(player.anim_idle);
-      }
-
-	  if (jam.Input.justPressed("X")) {
-        if (inter != undefined) {
-          inter.interact();
-        }
-      }
-
-	  player.lastPositions.splice(0,0, jam.Vector(player.x + player.width / 2, player.y + player.height / 2));
-	  for(var i = 0; i < Math.min(player.lastPositions.length, 10); ++i){
-	    player.smoothX += player.lastPositions[i].x;
-	    player.smoothY += player.lastPositions[i].y;
-	  }
-	  player.smoothX /= i+1;
-	  player.smoothY /= i+1;
-    });
-    return player;
-  }
-
-  var test_obj = {
-    x : 60,
-    y : 60,
-    width : 16,
-    height : 17,
-    label : "test",
-    img : "data/player_red.png",
-    interact : "Hi puppy."
-  };
-
-  var objs = [];
-
-  var makeObj = function(data){
-    var collide_overflow = 8;
-    var obj = jam.AnimatedSprite(data.x, data.y);
-    obj.setImage(data.img, data.width, data.height);
-    obj.setCollisionOffsets(-collide_overflow, -collide_overflow, data.width + (collide_overflow * 2), data.height + (collide_overflow * 2));
-    obj.interact = function() {
-      var txt = jam.Text(40, 40);
-      game.add(txt);
-      txt.font = "40pt calibri";
-      txt.color = "red";
-      txt.text = data.interact
-      console.log(data.interact);
-    };
-    objs.push(obj);
-    return obj;
-  };
-
 
   // Show a loading bar until all the preloading is done, at which point
   // call initialize()

@@ -1,30 +1,29 @@
-
 // A Sprite is an object with an image and very simple physics.
 // There is no collision detection, but it has position, velocity, acceleration
 jam.Sprite = function(x, y){
-	var self = {};	
-	
+	var self = {};
+
 	self._layer = 0;
 	self._game = null;
-	
-	self.facing = jam.Sprite.RIGHT;	
-	
+
+	self.facing = jam.Sprite.RIGHT;
+
 	self.x = x;
 	self.y = y;
 	self.width = 0;
 	self.height = 0;
 	self.angle = 0;
 	self.alpha = 1.0;
-	
+
 	self.image = null;
 	self.visible = true; // The sprite can be hidden by setting this to false
-	
+
 	self.velocity = jam.Vector(0,0);
 	self.acceleration = jam.Vector(0,0);
 
 	// How much the render position is affected by the camera
 	self.parallax = jam.Vector(1,1);
-	
+
 	// Loads an image and when it's finished loading, sets the sprite's image
 	// to it. Automatically adjusts the sprite's width and height.
 	self.setImage = function(url)
@@ -43,7 +42,7 @@ jam.Sprite = function(x, y){
 			self.image = jam.cache[url];
 			self.width = self.image.naturalWidth;
 			self.height = self.image.naturalHeight;
-			self.imageLoaded();			
+			self.imageLoaded();
 		}
 	}
 
@@ -58,24 +57,24 @@ jam.Sprite = function(x, y){
 							   self.width, self.height, 0, 0, self.width, self.height);
 		}
 	}
-	
+
 	self._renderHelper = function(context, camera, image, w, h, sx, sy, sw, sh){
 		// Avoid horrible automatic blending if we have non-integer values
 		var tx = Math.floor(self.x - camera.scroll.x * self.parallax.x + self.width/2);
 		var ty = Math.floor(self.y - camera.scroll.y * self.parallax.y + self.height/2);
 		context.save();
-		
+
 		// Set up the context transform and alpha before drawing
 		context.translate(tx, ty);
 		if(self.angle != 0){ context.rotate(self.angle * Math.PI / 180); }
 		if(self.alpha != 1.0){ context.globalAlpha = self.alpha; }
 		if(self.facing == jam.Sprite.LEFT){ context.scale(-1, 1);}
-		
+
 		context.drawImage(self.image, sx, sy, sw, sh, -self.width/2,-self.height/2, w, h);
-		
+
 		context.restore();
 	}
-	
+
 	// Handle simple physics every tick
 	self.update = function(elapsed){
 		// This vector math stuff sucks because there's no such thing as
@@ -89,7 +88,7 @@ jam.Sprite = function(x, y){
 		self.x += self.velocity.x * elapsed;
 		self.y += self.velocity.y * elapsed;
 	}
-	
+
 	// Sets the layer value then tells the game to sort
 	self.setLayer = function(layer){
 		self._layer = layer;
@@ -97,7 +96,7 @@ jam.Sprite = function(x, y){
 			self._game.sortSprites();
 		}
 	}
-	
+
 	return self;
 };
 

@@ -14,11 +14,16 @@ window.onload = function(){
 
 */
 
-jam.Game = function(width, height, parentElement){
+jam.Game = function(width, height, parentElement, can){
+
 	var self = {};
 
-	self._canvas = document.createElement("canvas"); 
-	self._canvas.style.position = "relative";
+    if (can === undefined){
+	  self._canvas = document.createElement("canvas");
+    } else {
+      self._canvas = can;
+    }
+    self._canvas.style.position = "relative";
 	self._context = self._canvas.getContext("2d");
 	self._children = [];
 
@@ -26,7 +31,7 @@ jam.Game = function(width, height, parentElement){
 
 	// List of objects to be removed
 	self._remove = [];
-	
+
 	// Always keep the canvas in the middle of the parent element
 	onresize = function(){
 		self._canvas.style.left = (parentElement.clientWidth / 2 - width / 2) +"px";
@@ -46,7 +51,7 @@ jam.Game = function(width, height, parentElement){
 		size:jam.Vector(self.width, self.height),
 		follow:null,
 	};
-	self.bgColor = "rgb(255,255,255)";	
+	self.bgColor = "rgb(255,255,255)";
 
 	// If they didn't supply this argument, assume the doc body
 	// as the parent element for the canvas
@@ -59,6 +64,10 @@ jam.Game = function(width, height, parentElement){
 	self._canvas.height = self.height
 
 	self._tick = function(){
+        if (self.paused === true) {
+		  window.setTimeout(self._tick, 1000.0/self.fps);
+          return;
+        }
 		self.update();
 		self.render();
 		window.setTimeout(self._tick, 1000.0/self.fps);
@@ -73,7 +82,7 @@ jam.Game = function(width, height, parentElement){
 
 		self.elapsed = 1.0/self.fps;
 		self.time += self.elapsed;
-		
+
 		// Simplest possible follow code
 		if(self.camera.follow !== null)
 		{
@@ -90,7 +99,7 @@ jam.Game = function(width, height, parentElement){
 
 	// Called every frame. Clears the screen then calls render on each child.
 	self.render = function(){
-		var ctx = self._context;
+        var ctx = self._context;
 		ctx.fillStyle = self.bgColor;
 		ctx.fillRect(0,0,self.width,self.height);
 		for (var i = self._children.length-1; i >= 0; --i)
@@ -116,11 +125,10 @@ jam.Game = function(width, height, parentElement){
 	self.run = function(){
 		self._tick();
 	};
-	
+
 	self.sortSprites = function(){
 		self._children.sort(function(a,b){ return b._layer - a._layer; });
 	}
 
 	return self;
 };
-
