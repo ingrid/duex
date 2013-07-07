@@ -10,13 +10,11 @@ window.onload = function(){
   jam.preload("data/player.png");
 
   var lost_game = function(){
-    /** /
+    /**/
     game.paused=true;
     var lost = jam.Game(640, 480, document.body, game._canvas);
     // Sceen count;
     lost.count = 5;
-    // 1 or 2;
-    lost.flag = 1;
     lost.moving = false;
     p = jam.AnimatedSprite(320, 240);
     var width = 20;
@@ -47,33 +45,40 @@ window.onload = function(){
     lost.move = function(dir){
       lost.moving = true;
       var s = 40;
+      lost.s = s;
       lost.dist = 0;
       lost.speed = {};
       lost.speed.x = 0;
       lost.speed.y = 0;
       lost.dir = dir;
+      console.log(dir);
       if (dir === 'u'){
         lost.dist = 640;
-        lost.speed.x = s;
-        lost.speed.y = 0;
-      } else if (dir === 'd') {
-        lost.dist = 640;
-        lost.speed.x = -s;
-        lost.speed.y = 0;
-      } else if (dir === 'l') {
-        lost.dist = 480;
-        lost.speed.x = 0;
-        lost.speed.y = -s;
-      } else if (dir === 'r') {
-        lost.dist = 480;
         lost.speed.x = 0;
         lost.speed.y = s;
+        lost.last = p.y;
+      } else if (dir === 'd') {
+        lost.dist = 640;
+        lost.speed.x = 0;
+        lost.speed.y = -s;
+        lost.last = p.y;
+      } else if (dir === 'l') {
+        lost.dist = 480;
+        lost.speed.x = -s;
+        lost.speed.y = 0;
+        lost.last = p.x;
+      } else if (dir === 'r') {
+        lost.dist = 480;
+        lost.speed.x = s;
+        lost.speed.y = 0;
+        lost.last = p.x;
       } else {
         console.log("No dir defined. Panic.");
       }
       var i;
       for (i in lost._children){
-        lost._children[i].velocity = speed;
+        console.log(lost.speed);
+        lost._children[i].velocity = lost.speed;
       }
     };
     p.speed = 20;
@@ -120,6 +125,7 @@ window.onload = function(){
           lost.move('u');
         }
       } else {
+        console.log(lost.dist_moved);
         if (lost.dist_moved >= lost.dist) {
           var i;
           for (i in lost._children){
@@ -127,7 +133,14 @@ window.onload = function(){
             lost.moving = false;
           }
         } else {
-          lost.dist_moved += Math.abs(lost.x - lost.dist_mo
+          if ((lost.dir === 'l') || (lost.dir === 'r')){
+            lost.dist_moved += Math.abs(lost.last - p.x);
+            lost.last = p.x;
+          } else {
+            lost.dist_moved += Math.abs(lost.last - p.y);
+            lost.last = p.y;
+          }
+
         }
       }
 
