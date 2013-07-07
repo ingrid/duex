@@ -8,19 +8,62 @@ jam.include("data/map.js");
 window.onload = function(){
   // Start loading images immediately instead of when they're needed
   jam.preload("data/player.png");
+  jam.preload('data/mtlayer1.wav');
+  jam.preload('data/mtlayer2.wav');
+  jam.preload('data/mtlayer3.wav');
+  jam.preload('data/mtlayer4.wav');
 
   var lost_game = function(){
     /**/
     game.paused=true;
     var lost = jam.Game(640, 480, document.body, game._canvas);
     // Sceen count;
-    lost.count = 5;
+    lost.count = 0;
     lost.moving = false;
     p = jam.AnimatedSprite(320, 240);
+    //p.x = 320;
+    //p.x = 240;
+    p.reading = false;
+    p.stop_read = function(){
+      p.reading = false;
+      txt.visible = false;
+      txt.text = "";
+      txt_bg.visible = false;
+    };
+
+    p.read = function(o, cb){
+      if (p.reading === true){
+        p.stop_read();
+      } else {
+        p.reading = true;
+        txt_bg.x = 0;
+        txt_bg.y = 280;
+        txt.x = txt_bg.x + 20
+        txt.y = txt_bg.y + 40
+        txt.visible = true;
+        txt.text = o;
+        txt_bg.visible = true;
+        p.inter_cb = cb;
+      }
+    };
+
+    var stop_sign = new jam.AnimatedSprite(300, 300);
+    stop_sign.visible = false;
+    stop_sign.setImage('data/stop.png');
+    stop_sign.interact = function(){
+      var cb = function() {
+        p.stop_read();
+        lost.paused=true;
+        game.paused=false;
+      };
+      p.read("STOP", cb);
+    };
+    stop
     var width = 20;
     var height = 30;
     var rate = 6;
     lost.dist_moved = 0;
+    lost.screens = 0;
     var coords = [
       [0, 0, 92, 85],
       [97, 0, 56, 38],
@@ -43,6 +86,7 @@ window.onload = function(){
     };
     make_map();
     lost.move = function(dir){
+      lost.screens++;
       lost.moving = true;
       var s = 600;
       lost.s = s;
@@ -66,6 +110,11 @@ window.onload = function(){
         lost.last = bg1.y;
         bg2.x = 0;
         bg2.y = (480);
+        if (lost.screens === 5) {
+          stop_sign.x = (0 + 176);
+          stop_sign.y = (480 + 92);
+          stop_sign.visible = true;
+        }
       } else if (dir === 'd') {
         lost.dist = 480;
         lost.speed.x = 0;
@@ -73,21 +122,35 @@ window.onload = function(){
         lost.last = bg1.y;
         bg2.x = 0;
         bg2.y = -480;
+        if (lost.screens === 5) {
+          stop_sign.x = (0 + 176);
+          stop_sign.y = (-480 + 92);
+          stop_sign.visible = true;
+        }
       } else if (dir === 'l') {
-        lost.dist = 680;
+        lost.dist = 640;
         lost.speed.x = -s;
         lost.speed.y = 0;
         lost.last = bg1.x;
         bg2.x = (640);
         bg2.y = 0;
+        if (lost.screens === 5) {
+          stop_sign.x = (640 + 176);
+          stop_sign.y = (0 + 92);
+          stop_sign.visible = true;
+        }
       } else if (dir === 'r') {
-        lost.dist = 680;
+        lost.dist = 640;
         lost.speed.x = s;
         lost.speed.y = 0;
         lost.last = bg1.x;
         bg2.x = -640;
         bg2.y = 0;
-
+        if (lost.screens === 5) {
+          stop_sign.x = (-640 + 176);
+          stop_sign.y = (0 + 92);
+          stop_sign.visible = true;
+        }
       } else {
         console.log("No dir defined. Panic.");
       }
@@ -109,7 +172,7 @@ window.onload = function(){
 	    if (p.collide(map_os[o])){
         }
       }
-      if (lost.moving === false){
+      if ((lost.moving === false) && (p.reading == false)){
         p.velocity.x = 0;
         p.velocity.y = 0;
 
@@ -129,6 +192,12 @@ window.onload = function(){
 	    } else if (jam.Input.buttonDown("DOWN")){
 	      p.velocity.y = p.speed;
 	      p.playAnimation(p.anim_down);
+        } else if (jam.Input.justPressed("X")) {
+          if (p.overlaps(stop_sign)) {
+            stop_sign.interact();
+          } else {
+	        p.playAnimation(p.anim_idle);
+          }
         } else{
 	      p.playAnimation(p.anim_idle);
         }
@@ -142,9 +211,9 @@ window.onload = function(){
         } else if (p.y > (480 + buff)) {
           lost.move('u');
         }
-      } else {
+      } else if (lost.moving == true) {
         p.playAnimation(p.anim_idle);
-        if (lost.dist_moved >= (lost.dist - 50)) {
+        if (lost.dist_moved >= (lost.dist - 45)) {
           var i;
           for (i in moving_objects){
             moving_objects[i].velocity = {x:0,y:0};
@@ -164,15 +233,21 @@ window.onload = function(){
           }
 
         }
+      } else if (p.reading == true) {
+	    if (jam.Input.justPressed("X")) {
+          p.inter_cb();
+        }
       }
-
     });
     var bg1 = jam.Sprite(0, 0);
     bg1.setImage("data/lost.png", 640, 480);
     var bg2 = jam.Sprite(0, 0);
     bg2.setImage("data/lost2.png", 640, 480);
-    var moving_objects = [bg1, bg2, p];
+    var moving_objects = [bg1, bg2, p, stop_sign];
+    lost.add(txt);
+    lost.add(txt_bg);
     lost.add(p)
+    lost.add(stop_sign)
     lost.add(bg2);
     lost.add(bg1);
     lost.run();
@@ -224,7 +299,16 @@ window.onload = function(){
       });
       coll.add(b);
     };
+  var bugs = [];
+  var i;
+  for (i = 0; i < 40; i++) {
+    var x = Math.floor(Math.random()*640);
+    var y = Math.floor(Math.random()*480);
+    var b = make_bug(x, y);
+    bugs.push(b);
+  }
   var t = make_bug(20, 20);
+
   coll.run();
   };
 
@@ -255,6 +339,20 @@ window.onload = function(){
     var coll_obj = {
       x : 120,
       y : 120,
+      width : 16,
+      height : 17,
+      label : "test",
+      img : "data/player_red.png",
+      text : "Hi puppy.",
+      interact : function() {
+        game.paused = true;
+        collection_game();
+      },
+    };
+
+    var lost_obj = {
+      x : 180,
+      y : 180,
       width : 16,
       height : 17,
       label : "test",
@@ -425,12 +523,12 @@ window.onload = function(){
 
     // Mark set.
 
-    var txt = jam.Text(20, 320);
+    txt = jam.Text(20, 320);
     txt.font = "20pt monospace";
     txt.color = "#fff";
     txt.visible = false;
     // 640, 480
-    var txt_bg = jam.Sprite(0, 280);
+    txt_bg = jam.Sprite(0, 280);
     var tmp_canvas = document.createElement("canvas");
     tmp_canvas.width = 640;
     tmp_canvas.height = 200;
@@ -460,8 +558,9 @@ window.onload = function(){
     var map = jam.LevelMap.loadTileMap(50, map1, "data/tiles.png");
     player = makePlayer(game, map);
     game.camera.follow = player;
-    var test = makeObj(test_obj);
-    var coll = makeObj(coll_obj);
+    var testo = makeObj(test_obj);
+    var collo = makeObj(coll_obj);
+    var losto = makeObj(lost_obj);
 
     bg.color = "rgba(0,128,255,0.75)";
 
@@ -504,12 +603,22 @@ window.onload = function(){
     makeMap();
     game.add(txt);
     game.add(txt_bg);
-    game.add(test);
-    game.add(coll);
+    game.add(testo);
+    game.add(collo);
+    game.add(losto);
     game.add(nbg);
 //    game.add(map);
     game.add(player);
 //    game.add(bg);
+
+    var l1 = jam.Sound.play('data/mtlayer1.wav');
+    l1.loop = true;
+    var l2 = jam.Sound.play('data/mtlayer2.wav');
+    l2.loop = true;
+    var l3 = jam.Sound.play('data/mtlayer3.wav');
+    l3.loop = true;
+    var l4 = jam.Sound.play('data/mtlayer4.wav');
+    l4.loop = true;
 
     game.run();
   }
