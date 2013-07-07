@@ -13,9 +13,59 @@ window.onload = function(){
   jam.preload('data/mtlayer3.wav');
   jam.preload('data/mtlayer4.wav');
 
+//		  window.setTimeout(self._tick, 1000.0/50);
+  var fade = function(snd, cb, speed, g){
+    var q;
+    if (g === 1){
+      q = function(){
+        return(snd.volume >= 1)
+      };
+    }
+    if (g === 0){
+      q = function(){
+        return(snd.volume <= 0)
+      };
+    }
+    var t = function(){
+      console.log(q());
+      if (q()){
+
+        if (cb != undefined){
+          cb();
+        }
+        return;
+      } else {
+        if((snd.volume + speed) < 0) {
+          snd.volume = 0;
+        } else {
+          snd.volume = snd.volume + speed;
+        }
+        window.setTimeout(t, 1000.0/50);
+      }
+    };
+    t();
+  };
+
+  var fade_in = function(url, cb){
+    fade(url, cb, 0.005, 1);
+  };
+
+  var fade_out = function(url, cb){
+    fade(url, cb, -0.005, 0);
+  };
+
   var lost_game = function(){
     /**/
     game.paused = true;
+    fade_out(l1, function(){
+      fade_in(lwm);
+    });
+    if (l2.volume > 0){
+     fade_out(l2);
+    }
+    if (l3.volume > 0){
+     fade_out(l3);
+    }
     var lost = jam.Game(640, 480, document.body, game._canvas);
     // Sceen count;
     lost.count = 0;
@@ -63,12 +113,10 @@ window.onload = function(){
     ];
     var tmp_canvas = document.createElement("canvas");
     tmp_canvas.width = 640;
-    tmp_canvas.height = 200;
+    tmp_canvas.height = 480;
     var tmp_context = tmp_canvas.getContext("2d");
     tmp_context.fillStyle = "#fff";
-    tmp_context.fillRect( 10, 10, 620, 180);
-    tmp_context.fillStyle = "#666666";
-    tmp_context.fillRect( 15, 15, 610, 170);
+    tmp_context.fillRect(0, 0, 640, 480);
     var fade_s;
     fade_s = new jam.Sprite(0, 0);
     fade_s.width = 640;
@@ -87,6 +135,7 @@ window.onload = function(){
         counter++;
       };
       var d = function(){
+        var car = jam.Sound.play('data/carsfx.wav');
         dia(lw_stop_text, cbe);
       };
       var cb = function(){
@@ -95,7 +144,7 @@ window.onload = function(){
           if (fade_s.alpha >= 1){
 
           } else {
-            fade_s.alpha = fade_s.alpha + 0.05;
+            fade_s.alpha = fade_s.alpha + 0.005;
           }
         });
         fade_s._layer=1;
@@ -288,8 +337,8 @@ window.onload = function(){
     for (u in txts){
       lost.add(txts[u]);
     }
-    lost.add(fade_s);
     lost.add(txt_bg);
+    lost.add(fade_s);
     lost.add(p)
     lost.add(stop_sign)
     lost.add(bg2);
@@ -911,18 +960,20 @@ var fishBowl = function () { // TB
     game.add(player);
 //    game.add(bg);
 
-    var l1 = jam.Sound.play('data/mtlayer1.wav');
+    lwm = jam.Sound.play('data/lostwoods.wav');
+    lwm.volume = 0;
+
+    l1 = jam.Sound.play('data/mtlayer1.wav');
     l1.loop = true;
-    var l2 = jam.Sound.play('data/mtlayer2.wav');
+    l2 = jam.Sound.play('data/mtlayer2.wav');
     l2.loop = true;
-    var l3 = jam.Sound.play('data/mtlayer3.wav');
+    l3 = jam.Sound.play('data/mtlayer3.wav');
     l3.loop = true;
-    var l4 = jam.Sound.play('data/mtlayer4.wav');
+    l4 = jam.Sound.play('data/mtlayer4.wav');
     l4.loop = true;
     l2.volume = 0;
     l3.volume = 0;
     l4.volume = 0;
-    console.log(l1.volume);
 
     if (jam.Debug.showBoundingBoxes == false) {
       intro(); //TB
