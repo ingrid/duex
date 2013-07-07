@@ -37,7 +37,9 @@ window.onload = function(){
       } else {
         if((snd.volume + speed) < 0) {
           snd.volume = 0;
-        } else {
+        } else if ((snd.volume + speed) > 1){
+          snd.volume = 1;
+        }else{
           snd.volume = snd.volume + speed;
         }
         window.setTimeout(t, 1000.0/50);
@@ -132,10 +134,20 @@ window.onload = function(){
         lost.paused=true;
         game.paused=false;
         console.log('foo');
-        counter++;
+        //
       };
       var d = function(){
         var car = jam.Sound.play('data/carsfx.wav');
+        fade_out(lwm, function(){
+          if (songs === 0){
+            fade_in(l2);
+            counter++;
+          }
+          if (songs === 1){
+            fade_in(l3);
+            counter++;
+          }
+        });
         dia(lw_stop_text, cbe);
       };
       var cb = function(){
@@ -777,15 +789,18 @@ var fishBowl = function () { // TB
       player.update = jam.extend(player.update, function(elapsed){
         if (songs < counter) {
           if (songs === 0){
-            l2.volume = 1;
+            fade_in(l2);
+//            l2.volume = 1;
             console.log('2 layers.');
           }
           if (songs === 1){
-            l3.volume = 1;
+            fade_in(l3);
+//            l3.volume = 1;
             console.log('3 layers.');
           }
           if (songs === 2){
-            l4.volume = 1;
+            fade_in(l4);
+//            l4.volume = 1;
             console.log('4 layers.');
           }
           songs++;
