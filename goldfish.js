@@ -65,7 +65,7 @@ window.onload = function(){
         lost.paused=true;
         game.paused=false;
       };
-      p.read("STOP", cb);
+      p.read(["STOP"], cb);
     };
     stop
     var width = 20;
@@ -253,7 +253,11 @@ window.onload = function(){
     var bg2 = jam.Sprite(0, 0);
     bg2.setImage("data/lost2.png", 640, 480);
     var moving_objects = [bg1, bg2, p, stop_sign];
-    lost.add(txt);
+    //lost.add(txt);
+    var u;
+    for (u in txts){
+      lost.add(txts[u]);
+    }
     lost.add(txt_bg);
     lost.add(p)
     lost.add(stop_sign)
@@ -350,7 +354,7 @@ window.onload = function(){
         var cb1 = function() {
           player.stop_read();
         }
-        player.read(["Hi puppy.","foo"], cb1);
+        player.read(["Hi puppy.","foo", "bar", "biz", "baz", "???"], cb1);
       },
     };
 
@@ -552,7 +556,7 @@ window.onload = function(){
 
     txts = [];
     var q;
-    nt = 5;
+    nt = 6;
     for (q = 0; q <= nt; q++) {
       var txt = jam.Text(20, 320);
       txt.font = "20pt monospace";
