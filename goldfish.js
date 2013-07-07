@@ -15,7 +15,7 @@ window.onload = function(){
 
   var lost_game = function(){
     /**/
-    game.paused=true;
+    game.paused = true;
     var lost = jam.Game(640, 480, document.body, game._canvas);
     // Sceen count;
     lost.count = 0;
@@ -35,34 +35,71 @@ window.onload = function(){
     };
 
     p.read = function(o, cb){
-      if (p.reading === true){
-        p.stop_read();
-      } else {
-        p.reading = true;
-        txt_bg.x = 0;
-        txt_bg.y = 280;
-        var e;
-        var w = txt_bg.x;
-        for (e in o){
-          txts[e].x = w + 20
-          txts[e].y = txt_bg.y + 40
-          txts[e].visible = true;
-          txts[e].text = o[e];
-          w = txts[e].x;
-        }
-        txt_bg.visible = true;
-        p.inter_cb = cb;
+      for (r in txts){
+        txts[r].text = "";
       }
+      p.reading = true;
+      txt_bg.x = 0;
+      txt_bg.y = 280;
+      var e;
+      var w = txt_bg.y + 20;
+      for (e in o){
+        txts[e].x = txt_bg.x + 20;
+        txts[e].y = w + 20;
+        txts[e].visible = true;
+        txts[e].text = o[e];
+        w = txts[e].y;
+      }
+      txt_bg.visible = true;
+      p.inter_cb = cb;
     };
 
+    var lw_stop_text = [
+      ["I waited for what felt like hours,", "watching the sun change the shadows,", "pretending that the lengthening", "darkness represented the presence of", "giants around me, towers I might one", "day scale & conquer & rule."],
+      ["I wanted to find my way out. Instead", "I was found, in shame, a failed", "escapee being brought back in."],
+      ["I wanted to push past the edges,", "find the magic portal that only the", "most worthy girls might find. But I", "was beginning to fear the idea of", "impossibility."],
+      ["I found only that each house I", "passed would be replaced by another,", "and another, and another, a magic", "forest that I might never escape -,", "no matter how perfectly", "charted"],
+      ["I wondered if you ever felt the same"]
+    ];
+    var tmp_canvas = document.createElement("canvas");
+    tmp_canvas.width = 640;
+    tmp_canvas.height = 200;
+    var tmp_context = tmp_canvas.getContext("2d");
+    tmp_context.fillStyle = "#fff";
+    tmp_context.fillRect( 10, 10, 620, 180);
+    tmp_context.fillStyle = "#666666";
+    tmp_context.fillRect( 15, 15, 610, 170);
+    var fade_s;
+    fade_s = new jam.Sprite(0, 0);
+    fade_s.width = 640;
+    fade_s.height = 480;
+    fade_s.image = tmp_canvas;
+    fade_s.alpha = 0;
     var stop_sign = new jam.AnimatedSprite(300, 300);
     stop_sign.visible = false;
     stop_sign.setImage('data/stop.png');
     stop_sign.interact = function(){
-      var cb = function() {
+      var cbe = function() {
         p.stop_read();
         lost.paused=true;
         game.paused=false;
+        console.log('foo');
+        counter++;
+      };
+      var d = function(){
+        dia(lw_stop_text, cbe);
+      };
+      var cb = function(){
+        fade_s.update = jam.extend(fade_s.update, function(elapsed){
+
+          if (fade_s.alpha >= 1){
+
+          } else {
+            fade_s.alpha = fade_s.alpha + 0.05;
+          }
+        });
+        fade_s._layer=1;
+        d();
       };
       p.read(["STOP"], cb);
     };
@@ -104,12 +141,6 @@ window.onload = function(){
       lost.speed.x = 0;
       lost.speed.y = 0;
       lost.dir = dir;
-      //console.log(lost.s = s);
-      //console.log(lost.dist = 0);
-      //console.log(lost.speed = {});
-      //console.log(lost.speed.x = 0);
-      //console.log(lost.speed.y = 0);
-      //console.log(lost.dir = dir);
 
       if (dir === 'u'){
         lost.dist = 480;
@@ -242,7 +273,7 @@ window.onload = function(){
 
         }
       } else if (p.reading == true) {
-	    if (jam.Input.justPressed("X")) {
+	    if (jam.Input.justPressed("Z")) {
           p.inter_cb();
         }
       }
@@ -257,11 +288,36 @@ window.onload = function(){
     for (u in txts){
       lost.add(txts[u]);
     }
+    lost.add(fade_s);
     lost.add(txt_bg);
     lost.add(p)
     lost.add(stop_sign)
     lost.add(bg2);
     lost.add(bg1);
+    var lw_start_text = [
+      ["In the stories my grandfather read", "to me when I was young, the children", "can escape when things go wrong."],
+      ["The heroine is scared. She runs", "away, and in the forest there is", "someone who knows how capable she", "can be."],
+      ["Perhaps there are magical creatures", "perhaps she was a princess the", "entire time, and someone knew it and", "was waiting for her."],
+      ["It is unfair that I can't do the", "same, but I can still keep trying, I", "can bolt out the front door and find", "new stories."],
+      ["Maybe find one that was right for me", "this whole time. Find strangers to", "watch, imagining they are travelers,", "from far-off places with kinder", "rules."],
+      ["But so often I simply found myself", "lost and scared, instead"]
+    ];
+    var dia =  function(dialogue, f) {
+      var i = 1;
+      var cb = function() {
+        i++;
+        if (i == dialogue.length) {
+          if (f !== undefined) {
+            f();
+          }
+          p.stop_read();
+        } else {
+          p.read(dialogue[i], cb);
+        }
+      };
+      p.read(dialogue[0], cb);
+    }
+    dia(lw_start_text);
     lost.run();
     /**/
   };
@@ -309,7 +365,6 @@ var fishBowl = function () { // TB
     theFish.update = jam.extend(theFish.update, function(elapsed) {
       if (jam.Input.justPressed("X")) {
         xPresses++;
-        console.log(xPresses);
         if (xPresses == 10) {
             theFish.setImage("data/toiletNoFish.png");
           }
@@ -368,9 +423,11 @@ var fishBowl = function () { // TB
       return s;
     };
     coll.update = jam.extend(coll.update, function(elapsed){
-      if (bcount === 0) {
+      if (bcount <= 0) {
         coll.paused = true;
         game.paused = false;
+        counter++;
+        console.log('bar');
       }
       if (jam.Input.buttonDown('MOUSE_LEFT')){
         if (net.visible === false){
@@ -383,7 +440,6 @@ var fishBowl = function () { // TB
               if (bugs[g].visible === true) {
                 bcount -= 1;
                 bugs[g].visible = false;
-                console.log(bcount);
               }
             }
           }
@@ -447,13 +503,15 @@ var fishBowl = function () { // TB
   coll.run();
   };
 
+  var songs = 0;
+
   var initialize = function(){
     game = jam.Game(640, 480, document.body);
 
     jam.Debug.showBoundingBoxes = true;		// Uncomment to see the collision regions
     counter = 0;
     if (jam.Debug.showBoundingBoxes == true) { // TB
-      counter = 3;
+      counter = 0;
     }
 
     var objs = [];
@@ -529,6 +587,7 @@ var fishBowl = function () { // TB
         var i = 0;
         var cb = function() {
           i++;
+          console.log(i);
           if (i == dialogue.length) {
             player.stop_read();
           } else {
@@ -667,6 +726,21 @@ var fishBowl = function () { // TB
       };
 
       player.update = jam.extend(player.update, function(elapsed){
+        if (songs < counter) {
+          if (songs === 0){
+            l2.volume = 1;
+            console.log('2 layers.');
+          }
+          if (songs === 1){
+            l3.volume = 1;
+            console.log('3 layers.');
+          }
+          if (songs === 2){
+            l4.volume = 1;
+            console.log('4 layers.');
+          }
+          songs++;
+        }
 	    // Collision
         var inter = undefined;
 	    //player.collide(map);
@@ -709,7 +783,7 @@ var fishBowl = function () { // TB
             }
           }
         } else {
-	      if (jam.Input.justPressed("X")) {
+	      if (jam.Input.justPressed("Z")) {
             player.inter_cb();
           }
         }
@@ -845,6 +919,10 @@ var fishBowl = function () { // TB
     l3.loop = true;
     var l4 = jam.Sound.play('data/mtlayer4.wav');
     l4.loop = true;
+    l2.volume = 0;
+    l3.volume = 0;
+    l4.volume = 0;
+    console.log(l1.volume);
 
     if (jam.Debug.showBoundingBoxes == false) {
       intro(); //TB

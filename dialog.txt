@@ -25,6 +25,7 @@ LW Aftermath (dialog bubbles on black screen)
 ["I wanted to push past the edges,", "find the magic portal that only the", "most worthy girls might find. But I", "was beginning to fear the idea of", "impossibility."],
 ["I found only that each house I", "passed would be replaced by another,", "and another, and another, a magic", "forest that I might never escape –,", "no matter how perfectly", "charted"],
 ["I wondered if you ever felt the same"], 
+
 Collection Game Start: (dialog bubbles in minigame)
 ["My grandmother first showed me about", "the beetles. How in the secret", "places one might find them", "skittering like shining & restless", "stones."],
 ["I would go out past the overpass on", "Sunday afternoons and try to catch", "them, these ancient things brought", "back to life."],
