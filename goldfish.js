@@ -47,17 +47,25 @@ window.onload = function(){
       var s = 600;
       lost.s = s;
       lost.dist = 0;
+      lost.dist_moved = 0;
       lost.speed = {};
       lost.speed.x = 0;
       lost.speed.y = 0;
       lost.dir = dir;
+      //console.log(lost.s = s);
+      //console.log(lost.dist = 0);
+      //console.log(lost.speed = {});
+      //console.log(lost.speed.x = 0);
+      //console.log(lost.speed.y = 0);
+      //console.log(lost.dir = dir);
+
       if (dir === 'u'){
         lost.dist = 480;
         lost.speed.x = 0;
         lost.speed.y = -s;
         lost.last = bg1.y;
         bg2.x = 0;
-        bg2.y = (480*2);
+        bg2.y = (480);
       } else if (dir === 'd') {
         lost.dist = 480;
         lost.speed.x = 0;
@@ -66,11 +74,11 @@ window.onload = function(){
         bg2.x = 0;
         bg2.y = -480;
       } else if (dir === 'l') {
-        lost.dist = 418;
+        lost.dist = 680;
         lost.speed.x = -s;
         lost.speed.y = 0;
         lost.last = bg1.x;
-        bg2.x = (640*2);
+        bg2.x = (640);
         bg2.y = 0;
       } else if (dir === 'r') {
         lost.dist = 680;
@@ -124,18 +132,19 @@ window.onload = function(){
         } else{
 	      p.playAnimation(p.anim_idle);
         }
-        if (p.x < 0) {
+        var buff = 5;
+        if (p.x < (0 - buff)) {
           lost.move('r');
-        } else if (p.x > 640) {
+        } else if (p.x > (640 + buff)) {
           lost.move('l');
-        } else if (p.y < 0) {
+        } else if (p.y < (0 - buff)) {
           lost.move('d');
-        } else if (p.y > 480) {
+        } else if (p.y > (480 + buff)) {
           lost.move('u');
         }
       } else {
         p.playAnimation(p.anim_idle);
-        if (lost.dist_moved >= lost.dist) {
+        if (lost.dist_moved >= (lost.dist - 50)) {
           var i;
           for (i in moving_objects){
             moving_objects[i].velocity = {x:0,y:0};
@@ -143,13 +152,11 @@ window.onload = function(){
           lost.moving = false;
           bg1.x = 0;
           bg1.y = 0;
+          bg2.x = 0;
+          bg2.y = 0;
         } else {
           if ((lost.dir === 'l') || (lost.dir === 'r')){
-            console.log(lost.dist_moved);
-            console.log(lost.dist_moved);
             lost.dist_moved = lost.dist_moved + Math.abs(lost.last - bg1.x);
-            console.log(lost.dist_moved);
-            console.log(lost.dist_moved);
             lost.last = bg1.x;
           } else {
             lost.dist_moved += Math.abs(lost.last - bg1.y);
@@ -202,7 +209,6 @@ window.onload = function(){
           vec.y = b.y - b.goal.y;
 
           if(((Math.abs(b.x - b.goal.x) > 20 ) || (Math.abs(b.y - b.goal.y) > 20))){
-            console.log(vec);
             b.velocity.x = -vec.x * b.speed;
             b.velocity.y = -vec.y * b.speed;
           }
