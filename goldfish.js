@@ -47,7 +47,6 @@ window.onload = function(){
           txts[e].x = w + 20
           txts[e].y = txt_bg.y + 40
           txts[e].visible = true;
-          console.log(o[e]);
           txts[e].text = o[e];
           w = txts[e].x;
         }
@@ -267,6 +266,66 @@ window.onload = function(){
     /**/
   };
 
+  var intro = function () { //TB
+    var title = jam.Game(640, 480, document.body, game._canvas);
+
+    var screen = new jam.Sprite(0,0); // spawn coords
+    screen.setImage("data/title.png", 680, 480);
+
+    var floater = jam.AnimatedSprite(270,0);
+    floater.reading = false;
+    floater.visible = false;
+    floater.setImage("data/fishFloat.png");
+
+    floater.anim_run = jam.Animation.Strip([0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16], 40, 480, 2, 0, 0,
+      function (){
+        setTimeout(function () {
+          title.paused = true;
+          game.run();
+        }, 500);
+
+      });
+
+    screen.update = jam.extend(screen.update, function(elapsed) {
+      if (jam.Input.justPressed("X")){
+        floater.visible = true;
+        floater.playAnimation(floater.anim_run);
+      }
+    });
+
+    title.add(floater);
+    title.add(screen);
+    title.run();
+  };
+
+var fishBowl = function () { // TB
+    game.pasued = true;
+    var bowl = jam.Game(640, 480, document.body, game._canvas);
+    var xPresses = 0;
+
+    var theFish = new jam.Sprite(0,0);
+    theFish.setImage("data/toiletYesFish.png", 640,480);
+
+    theFish.update = jam.extend(theFish.update, function(elapsed) {
+      if (jam.Input.justPressed("X")) {
+        xPresses++;
+        console.log(xPresses);
+        if (xPresses == 10) {
+            theFish.setImage("data/toiletNoFish.png");
+          }
+      }
+    });
+
+    bowl.add(theFish);
+    //transition
+    //play fish song
+    //dialogues with X/interact
+    //play flush
+    //quickfade white
+
+    bowl.run();
+  };
+
   var collection_game = function(){
     game.paused=true;
     var coll = jam.Game(640, 480, document.body, game._canvas);
@@ -338,7 +397,11 @@ window.onload = function(){
   var initialize = function(){
     game = jam.Game(640, 480, document.body);
 
-    jam.Debug.showBoundingBoxes = true;		// Uncomment to see the collision regions
+//    jam.Debug.showBoundingBoxes = true;		// Uncomment to see the collision regions
+    counter = 0;
+    if (jam.Debug.showBoundingBoxes == true) { // TB
+      counter = 3;
+    }
 
     var objs = [];
 
@@ -354,7 +417,8 @@ window.onload = function(){
         var cb1 = function() {
           player.stop_read();
         }
-        player.read(["Hi puppy.","foo", "bar", "biz", "baz", "???"], cb1);
+        // About 37 characters per line.
+        player.read(["Hi puppy.","foo", "bar", "biz", "baz", "1234567890123456789012345678901234567"], cb1);
       },
     };
 
@@ -386,6 +450,54 @@ window.onload = function(){
       },
     };
 
+    var fishObj = { // TB
+      x : 1878,
+      y : 97,
+      label : "fish",
+      img : "data/fishObj.png",
+      interact : function() {
+        game.paused = true;
+        fishBowl();
+      },
+    };
+
+    var carObj = { // TB
+      x : 133,
+      y : 392,
+      label : "car",
+      img : "data/carObj.png",
+      interact : function() {
+        var part1 = [];
+        var part2 = [];
+        var dialogue = [
+          "a", "b", "c"
+          //part2 = [ "d", "e", "f" ]
+        ]
+        var i = 0;
+        var cb = function() {
+          i++;
+          if (i == dialogue.length) {
+            player.stop_read();
+          } else {
+            player.read(dialogue[i], cb);
+          }
+        };
+        player.read(dialogue, cb);
+      },
+    };
+    var manObj = {
+      // TB 50 x 94
+      x : 970,
+      y : 835,
+      label : "man",
+      img : "data/evilMan.png",
+      interact : function() {
+        var cb = function() {
+          player.stop_read();
+        };
+        player.read("I work!", cb);
+      },
+    };
     var makeObj = function(data){
       var collide_overflow = 8;
       var obj = jam.AnimatedSprite(data.x, data.y);
@@ -422,6 +534,8 @@ window.onload = function(){
         [1659, 453, 98, 202],
         [1878, 351, 71, 381],
         [1567, 861, 103, 83],
+        [970, 835, 50, 94], // TB
+        [48, 454, 400, 90], // TB
         [1781, 793, 109, 109]
       ];
       for (i in coords){
@@ -447,6 +561,9 @@ window.onload = function(){
       var offsetx = 0;
       var player = jam.AnimatedSprite(80, 80);
       player.speed = 50;
+      if (jam.Debug.showBoundingBoxes == true) { //TB
+        player.speed = 500;
+      }
       player.reading = false;
       player.setImage("data/bunny.png", width, height);
       // Set up player's animations
@@ -462,10 +579,13 @@ window.onload = function(){
       player.smoothY = player.y + player.height/2;
 
       player.stop_read = function(){
-          player.reading = false;
-          txt.visible = false;
-          txt.text = "";
-          txt_bg.visible = false;
+        player.reading = false;
+        var r;
+        for (r in txts){
+          txts[r].visible = false;
+          txts[r].text = "";
+        }
+        txt_bg.visible = false;
       };
 
       player.read = function(o, cb){
@@ -602,6 +722,9 @@ window.onload = function(){
     var testo = makeObj(test_obj);
     var collo = makeObj(coll_obj);
     var losto = makeObj(lost_obj);
+    var fishObj = makeObj(fishObj); //TB
+    var carObj = makeObj(carObj); //TB
+    var manObj = makeObj(manObj); //TB
 
     bg.color = "rgba(0,128,255,0.75)";
 
@@ -650,6 +773,11 @@ window.onload = function(){
     game.add(txt_bg);
     game.add(testo);
     game.add(collo);
+    game.add(fishObj); //TB
+    game.add(carObj); //TB
+    if (counter >= 3) {
+      game.add(manObj); //TB
+    }
     game.add(losto);
     game.add(nbg);
 //    game.add(map);
@@ -665,7 +793,11 @@ window.onload = function(){
     var l4 = jam.Sound.play('data/mtlayer4.wav');
     l4.loop = true;
 
-    game.run();
+    if (jam.Debug.showBoundingBoxes == false) {
+      intro(); //TB
+    } else { game.run(); }
+
+    //game.run();
   }
 
   // Show a loading bar until all the preloading is done, at which point
