@@ -44,44 +44,52 @@ window.onload = function(){
     make_map();
     lost.move = function(dir){
       lost.moving = true;
-      var s = 40;
+      var s = 600;
       lost.s = s;
       lost.dist = 0;
       lost.speed = {};
       lost.speed.x = 0;
       lost.speed.y = 0;
       lost.dir = dir;
-      console.log(dir);
       if (dir === 'u'){
-        lost.dist = 640;
-        lost.speed.x = 0;
-        lost.speed.y = s;
-        lost.last = p.y;
-      } else if (dir === 'd') {
-        lost.dist = 640;
+        lost.dist = 480;
         lost.speed.x = 0;
         lost.speed.y = -s;
-        lost.last = p.y;
-      } else if (dir === 'l') {
+        lost.last = bg1.y;
+        bg2.x = 0;
+        bg2.y = (480*2);
+      } else if (dir === 'd') {
         lost.dist = 480;
+        lost.speed.x = 0;
+        lost.speed.y = s;
+        lost.last = bg1.y;
+        bg2.x = 0;
+        bg2.y = -480;
+      } else if (dir === 'l') {
+        lost.dist = 418;
         lost.speed.x = -s;
         lost.speed.y = 0;
-        lost.last = p.x;
+        lost.last = bg1.x;
+        bg2.x = (640*2);
+        bg2.y = 0;
       } else if (dir === 'r') {
-        lost.dist = 480;
+        lost.dist = 680;
         lost.speed.x = s;
         lost.speed.y = 0;
-        lost.last = p.x;
+        lost.last = bg1.x;
+        bg2.x = -640;
+        bg2.y = 0;
+
       } else {
         console.log("No dir defined. Panic.");
       }
       var i;
-      for (i in lost._children){
-        console.log(lost.speed);
-        lost._children[i].velocity = lost.speed;
+      for (i in moving_objects){
+        moving_objects[i].velocity = lost.speed;
       }
+      p.velocity = lost.speed;
     };
-    p.speed = 20;
+    p.speed = 200;
     p.setImage("data/shadow.png", width, height);
     p.anim_idle = jam.Animation.Strip([0], width, height, 0);
     p.anim_run = jam.Animation.Strip([4,3,4,5], width, height, rate);
@@ -89,13 +97,14 @@ window.onload = function(){
     p.anim_down = jam.Animation.Strip([7,6,7,8], width, height, rate);
     p.playAnimation(p.anim_idle);
     p.update = jam.extend(p.update, function(elapsed){
-      p.velocity.x = 0;
-      p.velocity.y = 0;
       for (o in map_os) {
 	    if (p.collide(map_os[o])){
         }
       }
       if (lost.moving === false){
+        p.velocity.x = 0;
+        p.velocity.y = 0;
+
 	    if(jam.Input.buttonDown("LEFT")){
 	      p.velocity.x = -p.speed;
 	      p.playAnimation(p.anim_run);
@@ -125,20 +134,26 @@ window.onload = function(){
           lost.move('u');
         }
       } else {
-        console.log(lost.dist_moved);
+        p.playAnimation(p.anim_idle);
         if (lost.dist_moved >= lost.dist) {
           var i;
-          for (i in lost._children){
-            lost._children[i].velocity = 0;
-            lost.moving = false;
+          for (i in moving_objects){
+            moving_objects[i].velocity = {x:0,y:0};
           }
+          lost.moving = false;
+          bg1.x = 0;
+          bg1.y = 0;
         } else {
           if ((lost.dir === 'l') || (lost.dir === 'r')){
-            lost.dist_moved += Math.abs(lost.last - p.x);
-            lost.last = p.x;
+            console.log(lost.dist_moved);
+            console.log(lost.dist_moved);
+            lost.dist_moved = lost.dist_moved + Math.abs(lost.last - bg1.x);
+            console.log(lost.dist_moved);
+            console.log(lost.dist_moved);
+            lost.last = bg1.x;
           } else {
-            lost.dist_moved += Math.abs(lost.last - p.y);
-            lost.last = p.y;
+            lost.dist_moved += Math.abs(lost.last - bg1.y);
+            lost.last = bg1.y;
           }
 
         }
@@ -148,9 +163,10 @@ window.onload = function(){
     var bg1 = jam.Sprite(0, 0);
     bg1.setImage("data/lost.png", 640, 480);
     var bg2 = jam.Sprite(0, 0);
-    bg2.setImage("data/lost.png", 640, 480);
-    lost.add(bg2);
+    bg2.setImage("data/lost2.png", 640, 480);
+    var moving_objects = [bg1, bg2, p];
     lost.add(p)
+    lost.add(bg2);
     lost.add(bg1);
     lost.run();
     /**/
@@ -225,6 +241,7 @@ window.onload = function(){
         var cb = function() {
           player.stop_read();
         };
+
         player.read(test_obj, cb);
       },
     };
