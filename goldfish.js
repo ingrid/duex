@@ -26,8 +26,11 @@ window.onload = function(){
     p.reading = false;
     p.stop_read = function(){
       p.reading = false;
-      txt.visible = false;
-      txt.text = "";
+      var r;
+      for (r in txts){
+        txts[r].visible = false;
+        txts[r].text = "";
+      }
       txt_bg.visible = false;
     };
 
@@ -38,10 +41,16 @@ window.onload = function(){
         p.reading = true;
         txt_bg.x = 0;
         txt_bg.y = 280;
-        txt.x = txt_bg.x + 20
-        txt.y = txt_bg.y + 40
-        txt.visible = true;
-        txt.text = o;
+        var e;
+        var w = txt_bg.x;
+        for (e in o){
+          txts[e].x = w + 20
+          txts[e].y = txt_bg.y + 40
+          txts[e].visible = true;
+          console.log(o[e]);
+          txts[e].text = o[e];
+          w = txts[e].x;
+        }
         txt_bg.visible = true;
         p.inter_cb = cb;
       }
@@ -267,6 +276,10 @@ window.onload = function(){
     tmp_context.fillStyle = color;
     tmp_context.fillRect( 0, 0, width, height);
 
+    game.update = jam.extend(game.update, function(elapsed){
+
+    });
+
     var make_bug = function(x, y){
       var b = new jam.Sprite(x, y);
       b.width = 10;
@@ -278,7 +291,13 @@ window.onload = function(){
         if (b.goal === undefined) {
           b.goal = {};
           b.goal.x = Math.floor(Math.random()*640);
+          while (Math.abs(b.goal.x - b.x) > 400) {
+            b.goal.x = Math.floor(Math.random()*640);
+          }
           b.goal.y = Math.floor(Math.random()*480);
+          while (Math.abs(b.goal.y - b.y) > 400) {
+            b.goal.y = Math.floor(Math.random()*480);
+          }
           var vec = {};
           vec.x = b.x - b.goal.x;
           vec.y = b.y - b.goal.y;
@@ -328,11 +347,10 @@ window.onload = function(){
       img : "data/player_red.png",
       text : "Hi puppy.",
       interact : function() {
-        var cb = function() {
+        var cb1 = function() {
           player.stop_read();
-        };
-
-        player.read(test_obj, cb);
+        }
+        player.read(["Hi puppy.","foo"], cb1);
       },
     };
 
@@ -453,10 +471,19 @@ window.onload = function(){
           player.reading = true;
           txt_bg.x = player.x - 320;
           txt_bg.y = player.y + 40;
-          txt.x = txt_bg.x + 20
-          txt.y = txt_bg.y + 40
-          txt.visible = true;
-          txt.text = o.text;
+          var e;
+          var w = txt_bg.y+ 15;
+          for (e in o){
+            txts[e].x = txt_bg.x + 20;
+            txts[e].y = w + 25;
+            txts[e].visible = true;
+            txts[e].text = o[e];
+            w = txts[e].y;
+          }
+          //txt.x = txt_bg.x + 20
+          //txt.y = txt_bg.y + 40
+          //txt.visible = true;
+          //txt.text = o;
           txt_bg.visible = true;
           player.inter_cb = cb;
         }
@@ -523,6 +550,16 @@ window.onload = function(){
 
     // Mark set.
 
+    txts = [];
+    var q;
+    nt = 5;
+    for (q = 0; q <= nt; q++) {
+      var txt = jam.Text(20, 320);
+      txt.font = "20pt monospace";
+      txt.color = "#fff";
+      txt.visible = false;
+      txts.push(txt);
+    }
     txt = jam.Text(20, 320);
     txt.font = "20pt monospace";
     txt.color = "#fff";
@@ -602,6 +639,10 @@ window.onload = function(){
 
     makeMap();
     game.add(txt);
+    var u;
+    for (u in txts){
+      game.add(txts[u]);
+    }
     game.add(txt_bg);
     game.add(testo);
     game.add(collo);
