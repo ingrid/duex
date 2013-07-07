@@ -338,9 +338,53 @@ var fishBowl = function () { // TB
     var tmp_context = tmp_canvas.getContext("2d");
     tmp_context.fillStyle = color;
     tmp_context.fillRect( 0, 0, width, height);
+    /**/
+    var canvasc = document.createElement("canvas");
+    canvasc.width = 200;
+    canvasc.height = 200;
+    var contextc = canvasc.getContext('2d');
+    var centerX = canvasc.width / 2;
+    var centerY = canvasc.height / 2;
+    var radius = 70;
 
-    game.update = jam.extend(game.update, function(elapsed){
+    contextc.beginPath();
+    contextc.arc(centerX, centerY, radius, 0, 2 * Math.PI, false);
+    contextc.fillStyle = 'green';
+    contextc.fill();
+    contextc.lineWidth = 5;
+    contextc.strokeStyle = '#003300';
+    contextc.stroke();
+    var net = new jam.Sprite(0,0);
+    net.image = canvasc;
+    net.width = canvasc.width;
+    net.height = canvasc.height;
+    net.visible = false;
+    coll.add(net);
+    net.layer=1;
+/**/
+    var sdist = function(v1, v2){
+      var s = (((v1.x - v2.x) * (v1.x - v2.x)) +
+               ((v1.y - v2.y) * (v1.y - v2.y)));
+      return s;
+    };
 
+    coll.update = jam.extend(coll.update, function(elapsed){
+      if (jam.Input.buttonDown('MOUSE_LEFT')){
+        if (net.visible === false){
+          net.x = jam.Input.mouse.x - 100;
+          net.y = jam.Input.mouse.y - 100;
+          net.visible = true;
+          var g;
+          for (g in bugs){
+              if (sdist(bugs[g], jam.Input.mouse) < 10000) {
+              bugs[g].visible = false;
+            }
+          }
+        } else {
+        }
+      } else {
+        net.visible = false;
+      }
     });
 
     var make_bug = function(x, y){
@@ -380,6 +424,7 @@ var fishBowl = function () { // TB
         }
       });
       coll.add(b);
+      return b;
     };
   var bugs = [];
   var i;
@@ -389,7 +434,6 @@ var fishBowl = function () { // TB
     var b = make_bug(x, y);
     bugs.push(b);
   }
-  var t = make_bug(20, 20);
 
   coll.run();
   };
@@ -397,7 +441,7 @@ var fishBowl = function () { // TB
   var initialize = function(){
     game = jam.Game(640, 480, document.body);
 
-//    jam.Debug.showBoundingBoxes = true;		// Uncomment to see the collision regions
+    jam.Debug.showBoundingBoxes = true;		// Uncomment to see the collision regions
     counter = 0;
     if (jam.Debug.showBoundingBoxes == true) { // TB
       counter = 3;
