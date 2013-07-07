@@ -367,8 +367,11 @@ var fishBowl = function () { // TB
                ((v1.y - v2.y) * (v1.y - v2.y)));
       return s;
     };
-
     coll.update = jam.extend(coll.update, function(elapsed){
+      if (bcount === 0) {
+        coll.paused = true;
+        game.paused = false;
+      }
       if (jam.Input.buttonDown('MOUSE_LEFT')){
         if (net.visible === false){
           net.x = jam.Input.mouse.x - 100;
@@ -376,8 +379,12 @@ var fishBowl = function () { // TB
           net.visible = true;
           var g;
           for (g in bugs){
-              if (sdist(bugs[g], jam.Input.mouse) < 10000) {
-              bugs[g].visible = false;
+            if (sdist(bugs[g], jam.Input.mouse) < 10000) {
+              if (bugs[g].visible === true) {
+                bcount -= 1;
+                bugs[g].visible = false;
+                console.log(bcount);
+              }
             }
           }
         } else {
@@ -427,8 +434,10 @@ var fishBowl = function () { // TB
       return b;
     };
   var bugs = [];
+  var nbugs = 40;
+  var bcount = nbugs;
   var i;
-  for (i = 0; i < 40; i++) {
+  for (i = 0; i < nbugs + 1; i++) {
     var x = Math.floor(Math.random()*640);
     var y = Math.floor(Math.random()*480);
     var b = make_bug(x, y);

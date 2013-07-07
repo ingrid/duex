@@ -1,0 +1,43 @@
+ 
+The Goldfish (bubbles over toilet image)
+["Dad:", "The goldfish was supposed to teach", "responsibility. Maybe you weren’t", "ready."],
+["But I was ready. I loved him. I", "told him my stories. I was a good", "friend."],
+["Dad:", "That makes it a lesson. It’s not", "enough to just give love. You have", "to take action. You should have", "been more aware."],
+["And now we get rid of it?"],
+["Dad:", "That’s your job."],
+["Can’t you? Why couldn’t you help me?", "I’m ten years old. It’s not fair."],
+["Dad:", "Sometimes what feels unfair is", "really fair after all. To see that", "is to grow up."],
+ Goldfish Aftermath (dialog bubbles on black screen)
+["Father says growing up is caring for", "what you love the proper way. But", "how am I expected to know what's", "proper? I am eight years old, after", "all."],
+["Mother says one day I’ll understand.", "But I do understand. It’s not fair.", "And all the best stories are about", "justice."],
+["You understand, don’t you?"],
+
+Lost Woods Game Start ((dialog bubbles in minigame)
+["In the stories my grandfather read", "to me when I was young, the children", "can escape when things go wrong."],
+["The heroine is scared. She runs", "away, and in the forest there is", "someone who knows how capable she", "can be."],
+["Perhaps there are magical creatures", "perhaps she was a princess the", "entire time, and someone knew it and", "was waiting for her."],
+["It is unfair that I can't do the", "same, but I can still keep trying, I", "can bolt out the front door and find", "new stories."],
+["Maybe find one that was right for me", "this whole time. Find strangers to", "watch, imagining they are travelers,", "from far-off places with kinder", "rules."],
+["But so often I simply found myself", "lost and scared, instead"], 
+LW Aftermath (dialog bubbles on black screen)
+["I waited for what felt like hours,", "watching the sun change the shadows,", "pretending that the lengthening", "darkness represented the presence of", "giants around me, towers I might one", "day scale & conquer & rule."],
+["I wanted to find my way out. Instead", "I was found, in shame, a failed", "escapee being brought back in."],
+["I wanted to push past the edges,", "find the magic portal that only the", "most worthy girls might find. But I", "was beginning to fear the idea of", "impossibility."],
+["I found only that each house I", "passed would be replaced by another,", "and another, and another, a magic", "forest that I might never escape –,", "no matter how perfectly", "charted"],
+["I wondered if you ever felt the same"], 
+Collection Game Start: (dialog bubbles in minigame)
+["My grandmother first showed me about", "the beetles. How in the secret", "places one might find them", "skittering like shining & restless", "stones."],
+["I would go out past the overpass on", "Sunday afternoons and try to catch", "them, these ancient things brought", "back to life."],
+["Bruce would come, with me and", "together we’d be off on our own sort", "of quest, gathering what we could", "before the sun fell."],
+
+Collection, Aftermath (dialog bubbles on black screen) 
+["If we returned empty—handed, we had", "still had our journey to someplace", "else—, and on the days we returned", "with our pockets full, we would", "spend hours sorting them on the", "floor."],
+["I labeled my treasures with little", "tapes, giving them names found in", "dusty books."],
+["If world sometimes made no sense, my", "collections always did."],
+
+  Girl, Conclusion – bubbles under girl
+
+["A decade passed since the last time", "I went out to gather insects with", "the family dog."],
+["I always, wondered how much he knew,", ", what he feared, or if he never", "quite saw the nature of my child’s", "world."],
+["I love the thought that maybe he did", "that he was the magic creature, who", "in secret, knew it all"],
+["bearing, along with me these secrets", "of memory, of small resistance, of", "coming-to-terms."],
